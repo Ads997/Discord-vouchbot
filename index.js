@@ -90,23 +90,11 @@ const client = new Client({
 
 // Express ping for uptime robot
 app.get('/', (req, res) => res.send('Bot is alive!'));
-const DEFAULT_PORT = process.env.PORT || 3000;
 
-function startServer(port) {
-  const server = app.listen(port, () => {
-    console.log(`🌐 Web server started on port ${port}`);
-  });
-
-  server.on('error', (err) => {
-    if (err.code === 'EADDRINUSE') {
-      console.warn(`Port ${port} is in use, trying port ${port + 1}...`);
-      startServer(port + 1);
-    } else {
-      console.error('Server error:', err);
-    }
-  });
-}
-startServer(Number(DEFAULT_PORT));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🌐 Web server started on port ${PORT}`);
+});
 
 function isValidDiscordId(id) {
   const maxSnowflake = BigInt('9223372036854775807');
@@ -127,16 +115,18 @@ client.once('ready', () => {
     return;
   }
 
-  config.servers.forEach(serverConfig => {
-    sendVouchForServer(serverConfig);
-  });
+  // Send one vouch per server at startup
+  config.servers.forEach(serverConfig => sendVouchForServer(serverConfig));
 
+  // Send vouches every 10 minutes per server
   setInterval(() => {
-    config.servers.forEach(serverConfig => {
-      sendVouchForServer(serverConfig);
-    });
+    config.servers.forEach(serverConfig => sendVouchForServer(serverConfig));
   }, 10 * 60 * 1000);
 });
+
+client.on('error', error => console.error('Discord client error:', error));
+client.on('warn', warning => console.warn('Discord client warning:', warning));
+client.on('debug', info => console.log('Discord client debug:', info));
 
 function getRandomFromArray(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
@@ -147,7 +137,7 @@ async function sendVouchForServer(serverConfig) {
     const { serverId, channelId, userIds } = serverConfig;
     if (!userIds || userIds.length === 0) return;
 
-    const validUserIds = userIds.filter(id => isValidDiscordId(id));
+    const validUserIds = userIds.filter(isValidDiscordId);
     if (validUserIds.length === 0) {
       console.warn(`No valid user IDs in server ${serverId}`);
       return;
