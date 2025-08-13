@@ -211,6 +211,10 @@ client.on('debug', info => {
   console.log('Discord debug:', info);
 });
 
+client.once('ready', () => {
+  console.log(`✅ Logged in as ${client.user.tag}`);
+});
+
 client.login(process.env.TOKEN).catch(err => {
   console.error('❌ Failed to login:', err);
 });
