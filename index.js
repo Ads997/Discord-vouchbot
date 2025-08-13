@@ -199,7 +199,7 @@ async function sendVouchForServer(serverConfig) {
   }
 }
 
-// DEBUG: Check if TOKEN is set
-console.log('TOKEN is set:', !!process.env.TOKEN);
+// Debug: Check token value (first 10 chars)
+console.log('Using token:', process.env.TOKEN?.slice(0, 10) + '...');
 
 client.login(process.env.TOKEN);
