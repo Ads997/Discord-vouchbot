@@ -199,9 +199,18 @@ async function sendVouchForServer(serverConfig) {
   }
 }
 
-// Debug: Check token value (first 10 chars)
-console.log('Using token:', process.env.TOKEN?.slice(0, 10) + '...');
+client.on('error', error => {
+  console.error('Discord client error:', error);
+});
+
+client.on('warn', info => {
+  console.warn('Discord client warning:', info);
+});
+
+client.on('debug', info => {
+  console.log('Discord debug:', info);
+});
 
 client.login(process.env.TOKEN).catch(err => {
-  console.error('Failed to login:', err);
+  console.error('❌ Failed to login:', err);
 });
