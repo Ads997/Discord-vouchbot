@@ -202,4 +202,6 @@ async function sendVouchForServer(serverConfig) {
 // Debug: Check token value (first 10 chars)
 console.log('Using token:', process.env.TOKEN?.slice(0, 10) + '...');
 
-client.login(process.env.TOKEN);
+client.login(process.env.TOKEN).catch(err => {
+  console.error('Failed to login:', err);
+});
