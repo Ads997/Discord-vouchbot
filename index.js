@@ -122,6 +122,17 @@ function isValidDiscordId(id) {
   }
 }
 
+// ---- Rotation helpers (only addition) ----
+const rotationQueues = new Map(); // serverId -> queue (shuffled)
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+// ------------------------------------------
+
 client.once('ready', () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
 
@@ -167,7 +178,15 @@ async function sendVouchForServer(serverConfig) {
       return;
     }
 
-    const userId = getRandomFromArray(validUserIds);
+    // ---- Use rotation queue for TARGET user selection (only change) ----
+    let queue = rotationQueues.get(serverId);
+    if (!queue || queue.length === 0) {
+      queue = shuffle([...validUserIds]);     // new shuffled round
+      rotationQueues.set(serverId, queue);
+    }
+    const userId = queue.shift();              // pick next in rotation
+    // --------------------------------------------------------------------
+
     const rating = getRandomFromArray(RATINGS);
     const feedbackList = RATING_MESSAGES[rating.value];
     const feedback = getRandomFromArray(feedbackList);
