@@ -159,7 +159,7 @@ if (!process.env.TOKEN) {
   process.exit(1);
 }
 
-console.log("🟡 TOKEN length:", process.env.TOKEN?.length || "MISSING");
+console.log("🟡 Using TOKEN length:", process.env.TOKEN.length);
 
 client.login(process.env.TOKEN)
   .then(() => console.log("✅ Login request sent..."))
