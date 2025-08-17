@@ -1,3 +1,4 @@
+
 const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const express = require('express');
 require('dotenv').config();
@@ -88,7 +89,7 @@ app.listen(PORT, () => console.log(`🌐 Web server running on port ${PORT}`));
 
 // --- Bot ready ---
 client.once('ready', () => {
-  console.log(`✅ Logged in as ${client.user.tag}`);
+  console.log(`🤖 Bot is online as ${client.user.tag}`);
 
   const serverConfig = config.servers[0];
   sendVouchForServer(serverConfig);
@@ -148,8 +149,19 @@ async function sendVouchForServer(serverConfig) {
     console.log(`✅ Sent vouch from ${fromMember.user.tag} to ${targetUser.tag} with rating ${rating.stars} and feedback: "${feedback}"`);
 
   } catch (err) {
-    console.error('❌ Failed to send vouch:', err);
+    console.error('❌ Failed to send vouch:', err.message);
   }
 }
 
-client.login(process.env.TOKEN);
+// --- Login with error handling ---
+if (!process.env.TOKEN) {
+  console.error("❌ No TOKEN found in environment variables!");
+  process.exit(1);
+}
+
+client.login(process.env.TOKEN)
+  .then(() => console.log("✅ Login request sent..."))
+  .catch(err => {
+    console.error("❌ Failed to login:", err.message);
+    process.exit(1); // exit so Render restarts
+  });
