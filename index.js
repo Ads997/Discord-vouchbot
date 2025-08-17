@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js'); 
+const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const express = require('express');
 require('dotenv').config();
 const config = require('./target.json');
@@ -64,7 +64,7 @@ client.once('ready', () => {
   const serverConfig = config.servers[0];
   sendVouchForServer(serverConfig);
 
-  setInterval(() => sendVouchForServer(serverConfig), 10 * 60 * 1000);
+  setInterval(() => sendVouchForServer(serverConfig), 10 * 60 * 1000); // every 10 min
 });
 
 // --- Send vouch ---
@@ -76,20 +76,24 @@ async function sendVouchForServer(serverConfig) {
     const guild = await client.guilds.fetch(serverId);
     const channel = await client.channels.fetch(channelId);
 
-    const members = await guild.members.fetch();
+    // Fetch up to 100 members to avoid GuildMembersTimeout
+    const members = await guild.members.list({ limit: 100 });
     const humanMembers = members.filter(m => !m.user.bot);
     const fromMember = getRandomFromArray([...humanMembers.values()]);
     if (!fromMember) return;
 
+    // Rotation queue for targets
     let queue = rotationQueues.get(serverId) || shuffle([...userIds]);
     rotationQueues.set(serverId, queue);
     const userId = queue.shift();
     rotationQueues.set(serverId, queue);
 
+    // Weighted rating and feedback
     const rating = weightedChoice(RATINGS);
     const feedback = getRandomFromArray(RATING_MESSAGES[rating.value]);
     const targetUser = await client.users.fetch(userId);
 
+    // Embed message
     const embed = new EmbedBuilder()
       .setColor(rating.color)
       .setAuthor({ name: fromMember.user.username, iconURL: fromMember.user.displayAvatarURL() })
@@ -113,14 +117,14 @@ async function sendVouchForServer(serverConfig) {
 
 // --- Login with robust error handling ---
 if (!process.env.TOKEN) {
-  console.error("❌ TOKEN not set in environment variables!")
+  console.error("❌ TOKEN not set in environment variables!");
   process.exit(1);
 }
 
 console.log("🟡 Using TOKEN length:", process.env.TOKEN.length);
 client.on('error', console.error);
 client.on('warn', console.warn);
-
+client.on('shardError', error => console.error('⚠️ Shard error:', error));
 
 client.login(process.env.TOKEN)
   .then(() => console.log("✅ Login request sent..."))
