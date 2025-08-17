@@ -148,6 +148,7 @@ async function sendVouchForServer(serverConfig) {
     const fromMember = getRandomFromArray([...humanMembers.values()]);
     if (!fromMember) return;
 
+    // Rotation queue for targets
     let queue = rotationQueues.get(serverId) || shuffle([...userIds]);
     rotationQueues.set(serverId, queue);
 
