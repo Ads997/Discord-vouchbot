@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
+const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js'); 
 const express = require('express');
 require('dotenv').config();
 const config = require('./target.json');
@@ -118,6 +118,9 @@ if (!process.env.TOKEN) {
 }
 
 console.log("🟡 Using TOKEN length:", process.env.TOKEN.length);
+client.on('error', console.error);
+client.on('warn', console.warn);
+
 
 client.login(process.env.TOKEN)
   .then(() => console.log("✅ Login request sent..."))
