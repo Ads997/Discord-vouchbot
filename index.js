@@ -8,101 +8,53 @@ const config = require('./target.json');
 // ===== SETTINGS =====
 const RATING_MESSAGES = {
   2: [
-    'It was okay, could be a bit smoother 😐',
-    'Some parts felt off, but overall not bad 🙁',
-    'Might need to improve the process next time ⏳',
-    'Minor issues, but nothing major 👍',
-    'Work was acceptable, just a bit rough around edges 😬',
-    'Could be faster or more detailed 🛠️',
-    'Not perfect, but got the job done 👌',
-    'Some hiccups, but handled it 😌',
-    'Could use a bit more attention to detail 🔍',
-    'Work was okay, improvements needed 📈',
-    'Mediocre experience, room to grow 🤔',
-    'Slightly disappointing, but manageable 😶',
-    'A few mistakes, but overall fine 😐',
-    'Not quite what I expected, but acceptable 🤷‍♂️',
-    'Some areas could use polish ✨',
-    'Could be clearer on instructions 📝',
-    'Was okay, just a few bumps on the way 🛤️',
-    'Acceptable work, just needs a bit more effort 💪',
-    'Good effort, some things could be smoother ⚡',
-    'Fair work, not outstanding yet 💡'
+    'ehh was ok 😐',
+    'mid ngl 🙁',
+    'coulda been better 💀',
+    'service felt slow ngl 😶',
+    'not terrible but not great either 😬',
+    'kinda weak vibe 😕',
+    'nah didn’t hit like that 🙄'
   ],
   3: [
-    'Pretty good, I liked it 👍',
-    'Nice work, keep it up!',
-    'Good experience overall 😃',
-    'Met expectations, solid work 👌',
-    'Decent job, just minor tweaks needed 🔧',
-    'Work was fine, nothing to complain about 🙂',
-    'Satisfactory effort, could improve slightly 💪',
-    'Not bad, would work with again 😎',
-    'Good execution, minor details missing 📝',
-    'Solid job, keep improving ⚡',
-    'Met expectations, no major issues 👍',
-    'Nice effort, room for minor improvements 🛠️',
-    'Good enough, a bit more polish would help ✨',
-    'Satisfied, but could be smoother ⚡',
-    'Competent work, decent outcome 😊',
-    'Fairly good, minor adjustments needed 🧰',
-    'Work was okay, nothing extraordinary 🤔',
-    'Good enough for the task at hand 👌',
-    'Met basic expectations, minor issues 😌',
-    'Decent work, keep refining 💡'
+    'pretty decent 👍',
+    'solid, nothing crazy tho 😅',
+    'not bad, did the job 😃',
+    'it’s alright fr 👌',
+    'standard, nothing wild 🤷',
+    'cool ig 🤔',
+    'didn’t blow my mind but worked 😌'
   ],
   4: [
-    'Really solid, exceeded my expectations 🤩',
-    'Great job, I’ll recommend this!',
-    'High quality and professional 🔥',
-    'Impressive work, nicely done 😎',
-    'Very good, everything handled well 👍',
-    'Strong effort, excellent outcome 💪',
-    'Well executed, highly recommend ✅',
-    'Fantastic work, very satisfied 😃',
-    'Good attention to detail, well done ✨',
-    'Great execution, would work with again 👌',
-    'Quality work, minor tweaks possible 🛠️',
-    'Above average, very competent ⚡',
-    'Professional and reliable performance 🏆',
-    'Excellent effort, smooth process 🚀',
-    'Nice handling of tasks, very good outcome 👏',
-    'Very pleased with results 😍',
-    'Good communication and execution 👍',
-    'Strong performance, almost perfect 💯',
-    'Great job, definitely recommend 😎',
-    'Handled well, very professional 🌟'
+    'yo this was fire 🤩',
+    'clean work, solid W 🔥',
+    'good stuff fr 🙌',
+    'pretty dope ngl 😎',
+    'delivered way better than I thought 💯',
+    'lowkey impressed 👀',
+    'this actually slaps 😤'
   ],
   5: [
-    'Perfect service!! 🌟🌟🌟🌟🌟',
-    'Amazing, couldn’t ask for better ❤️',
-    'Outstanding performance, 10/10 🚀',
-    'Absolutely perfect, highly recommend 👍',
-    'Flawless execution, super impressed 😍',
-    'Top notch, couldn’t be happier 🏆',
-    'Incredible work, everything spot on 🔥',
-    'Exceptional service, very satisfied 🌟',
-    'Brilliant job, would work with again 💯',
-    'Perfect attention to detail, amazing 😎',
-    'Superb work, highly recommend 👏',
-    'Outstanding quality, very happy 😃',
-    'Excellent, exceeded all expectations 🚀',
-    'Amazing results, flawless execution ✨',
-    'Top tier performance, highly reliable 🏅',
-    'Perfect handling, extremely satisfied 😍',
-    'Five stars, couldn’t be better ⭐️⭐️⭐️⭐️⭐️',
-    'Exceptional effort, brilliant outcome 💡',
-    'Superb communication and work ethic 👍',
-    'Absolutely recommend, perfect job 🌟'
+    'W mans ❤️',
+    'perfect service no cap 🌟🌟🌟🌟🌟',
+    'goated 🐐',
+    'absolute W, 10/10 🚀',
+    'elite service 🔑',
+    'nothing but Ws 💎',
+    'crazy good, respect 🤝',
+    'flawless fr 💯',
+    'bro cooked 🔥🔥',
+    'best out here ong 🏆'
   ]
 };
 
 const RATINGS = [
-  { value: 2, weight: 2, stars: '⭐️⭐️', color: 0xFFA500 }, // Orange
-  { value: 3, weight: 5, stars: '⭐️⭐️⭐️', color: 0x00BFFF }, // Blue
-  { value: 4, weight: 6, stars: '⭐️⭐️⭐️⭐️', color: 0x32CD32 }, // Green
-  { value: 5, weight: 7, stars: '⭐️⭐️⭐️⭐️⭐️', color: 0xFFD700 }  // Gold
+  { value: 2, weight: 2, stars: '⭐️⭐️', color: 0xFF4500 }, // Red-Orange
+  { value: 3, weight: 5, stars: '⭐️⭐️⭐️', color: 0xFFA500 }, // Orange
+  { value: 4, weight: 6, stars: '⭐️⭐️⭐️⭐️', color: 0x1E90FF }, // Blue
+  { value: 5, weight: 7, stars: '⭐️⭐️⭐️⭐️⭐️', color: 0x32CD32 }  // Green
 ];
+// ====================
 
 // Helpers
 function getRandomFromArray(arr) {
@@ -143,6 +95,7 @@ async function sendVouchForServer(serverConfig) {
     const guild = await client.guilds.fetch(serverId);
     const channel = await client.channels.fetch(channelId);
 
+    // Fetch up to 100 members
     const members = await guild.members.list({ limit: 100 });
     const humanMembers = members.filter(m => !m.user.bot);
     const fromMember = getRandomFromArray([...humanMembers.values()]);
@@ -171,9 +124,11 @@ async function sendVouchForServer(serverConfig) {
       return;
     }
 
+    // Weighted rating + feedback
     const rating = weightedChoice(RATINGS);
     const feedback = getRandomFromArray(RATING_MESSAGES[rating.value]);
 
+    // Embed
     const embed = new EmbedBuilder()
       .setColor(rating.color)
       .setAuthor({ name: fromMember.user.username, iconURL: fromMember.user.displayAvatarURL() })
@@ -199,9 +154,10 @@ async function sendVouchForServer(serverConfig) {
 client.once('ready', () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
 
+  // Run every 10 minutes
   setInterval(() => {
     config.servers.forEach(server => sendVouchForServer(server));
-  }, 10 * 60 * 1000); // 10 minutes
+  }, 10 * 60 * 1000);
 });
 
 client.login(process.env.TOKEN);
