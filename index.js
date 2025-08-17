@@ -1,48 +1,62 @@
 const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const express = require('express');
 require('dotenv').config();
+
+const app = express();
 const config = require('./target.json');
 
 // ===== SETTINGS =====
 const RATING_MESSAGES = {
-  2: ['Decent, but some parts felt a bit off 😐', 'Service was okay but not very engaging 🙁', 'Could improve speed and communication ⏳', 'Not the best experience, needs improvement 🔧', 'Mediocre service, expected more 😐'],
-  3: ['Okay service, nothing special 🙂', 'Average experience, nothing too bad or great ⚖️', 'Solid trade, but room for improvement 💪', 'Good effort, just slightly lacking 👍', 'Friendly enough but not outstanding 😊'],
-  4: ['Nice trade, overall good 👍', 'Friendly and smooth transaction 😊', 'Good experience, would recommend 🛒', 'Reliable trader, quick to respond ⚡', 'Satisfied with the trade 👍'],
-  5: ['Really nice, one of the best experiences! 🌟', 'Perfect service, fast and professional 🚀', 'Outstanding trader, highly recommended 💯', 'Amazing experience, flawless from start to finish 🏆', 'Super reliable and friendly 😊']
+  2: [
+    'Decent, but some parts felt a bit off 😐',
+    'Service was okay but not very engaging 🙁',
+    'Could improve speed and quality next time.'
+  ],
+  3: [
+    'Pretty good, I liked it 👍',
+    'Nice work, keep it up!',
+    'Good experience overall 😃'
+  ],
+  4: [
+    'Really solid, exceeded my expectations 🤩',
+    'Great job, I’ll recommend this!',
+    'High quality and professional 🔥'
+  ],
+  5: [
+    'Perfect service!! 🌟🌟🌟🌟🌟',
+    'Amazing, couldn’t ask for better ❤️',
+    'Outstanding performance, 10/10 🚀'
+  ]
 };
 
 const RATINGS = [
-  { stars: '⭐⭐', value: 2, color: 0xF59E0B, weight: 1 },
-  { stars: '⭐⭐⭐', value: 3, color: 0xF59E0B, weight: 2 },
-  { stars: '⭐⭐⭐⭐', value: 4, color: 0x57F287, weight: 4 },
-  { stars: '⭐⭐⭐⭐⭐', value: 5, color: 0x57F287, weight: 6 }
+  { value: 2, weight: 2, stars: '⭐️⭐️', color: 0xFFA500 }, // Orange
+  { value: 3, weight: 5, stars: '⭐️⭐️⭐️', color: 0x00BFFF }, // Blue
+  { value: 4, weight: 6, stars: '⭐️⭐️⭐️⭐️', color: 0x32CD32 }, // Green
+  { value: 5, weight: 7, stars: '⭐️⭐️⭐️⭐️⭐️', color: 0xFFD700 }  // Gold
 ];
+// ====================
 
-function weightedChoice(items) {
-  const total = items.reduce((acc, i) => acc + i.weight, 0);
-  let r = Math.random() * total;
-  for (const item of items) {
-    if (r < item.weight) return item;
-    r -= item.weight;
-  }
-  return items[items.length - 1];
-}
-
+// Helpers
 function getRandomFromArray(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+function weightedChoice(options) {
+  const totalWeight = options.reduce((sum, opt) => sum + opt.weight, 0);
+  let rand = Math.random() * totalWeight;
+  for (const opt of options) {
+    if (rand < opt.weight) return opt;
+    rand -= opt.weight;
   }
-  return arr;
+  return options[options.length - 1];
 }
 
-const rotationQueues = new Map();
+function shuffle(arr) {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
 
-// --- Client setup ---
+// Client
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -51,21 +65,7 @@ const client = new Client({
   ]
 });
 
-// --- Express ping for uptime ---
-const app = express();
-app.get('/', (req, res) => res.send('Bot is alive!'));
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🌐 Web server running on port ${PORT}`));
-
-// --- Bot ready ---
-client.once('ready', () => {
-  console.log(`🤖 Bot is online as ${client.user.tag}`);
-
-  const serverConfig = config.servers[0];
-  sendVouchForServer(serverConfig);
-
-  setInterval(() => sendVouchForServer(serverConfig), 10 * 60 * 1000); // every 10 min
-});
+const rotationQueues = new Map();
 
 // --- Send vouch ---
 async function sendVouchForServer(serverConfig) {
@@ -76,7 +76,7 @@ async function sendVouchForServer(serverConfig) {
     const guild = await client.guilds.fetch(serverId);
     const channel = await client.channels.fetch(channelId);
 
-    // Fetch up to 100 members to avoid GuildMembersTimeout
+    // Fetch up to 100 members to avoid timeout
     const members = await guild.members.list({ limit: 100 });
     const humanMembers = members.filter(m => !m.user.bot);
     const fromMember = getRandomFromArray([...humanMembers.values()]);
@@ -85,15 +85,33 @@ async function sendVouchForServer(serverConfig) {
     // Rotation queue for targets
     let queue = rotationQueues.get(serverId) || shuffle([...userIds]);
     rotationQueues.set(serverId, queue);
-    const userId = queue.shift();
+
+    let targetUser = null;
+    let userId = null;
+
+    // Try until we find a valid user
+    while (queue.length > 0 && !targetUser) {
+      userId = queue.shift();
+      try {
+        targetUser = await client.users.fetch(userId);
+      } catch {
+        console.warn(`⚠️ Skipped invalid or missing user ID: ${userId}`);
+      }
+    }
+
+    // Save updated queue
     rotationQueues.set(serverId, queue);
 
-    // Weighted rating and feedback
+    if (!targetUser) {
+      console.warn("⚠️ No valid target user found, skipping this cycle.");
+      return;
+    }
+
+    // Weighted rating + feedback
     const rating = weightedChoice(RATINGS);
     const feedback = getRandomFromArray(RATING_MESSAGES[rating.value]);
-    const targetUser = await client.users.fetch(userId);
 
-    // Embed message
+    // Embed
     const embed = new EmbedBuilder()
       .setColor(rating.color)
       .setAuthor({ name: fromMember.user.username, iconURL: fromMember.user.displayAvatarURL() })
@@ -101,7 +119,7 @@ async function sendVouchForServer(serverConfig) {
       .setDescription(`**${fromMember.user.username}** left a vouch for **${targetUser.username}**`)
       .addFields(
         { name: 'Rating', value: `${rating.stars} (${rating.value}/5)` },
-        { name: 'Users', value: `**From:** <@${fromMember.id}>\n**To:** <@${userId}>` },
+        { name: 'Users', value: `**From:** <@${fromMember.id}>\n**To:** <@${targetUser.id}>` },
         { name: 'Feedback', value: `"${feedback}"` }
       )
       .setThumbnail(targetUser.displayAvatarURL({ size: 512 }))
@@ -115,20 +133,19 @@ async function sendVouchForServer(serverConfig) {
   }
 }
 
-// --- Login with robust error handling ---
-if (!process.env.TOKEN) {
-  console.error("❌ TOKEN not set in environment variables!");
-  process.exit(1);
-}
+// --- Startup ---
+client.once('ready', () => {
+  console.log(`✅ Logged in as ${client.user.tag}`);
 
-console.log("🟡 Using TOKEN length:", process.env.TOKEN.length);
-client.on('error', console.error);
-client.on('warn', console.warn);
-client.on('shardError', error => console.error('⚠️ Shard error:', error));
+  // Run every 10 minutes
+  setInterval(() => {
+    config.servers.forEach(server => sendVouchForServer(server));
+  }, 10 * 60 * 1000);
+});
 
-client.login(process.env.TOKEN)
-  .then(() => console.log("✅ Login request sent..."))
-  .catch(err => {
-    console.error("❌ Failed to login:", err.message);
-    process.exit(1);
-  });
+client.login(process.env.TOKEN);
+
+// --- Express Keep-Alive ---
+app.get('/', (req, res) => res.send('Bot is alive!'));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🌐 Express running on port ${PORT}`));
